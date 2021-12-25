@@ -11,7 +11,27 @@
 #include "QString"
 #include "cassert"
 #include "QVector"
-#include "additional_func.h"
+#include "QList"
+#include "QStringList"
+
+typedef QVector<double> QVdouble;
+typedef QVector<QVdouble> QVVdouble;
+
+inline QString str_fill (int length, char fillChar = ' ') {
+    QString String_p = "";
+    for (int i = 0; i < length; ++i) {
+        String_p += fillChar;
+    }
+    return String_p;
+}
+
+inline QString str_fill (int length, QString fillStr) {
+    QString String_p = "";
+    for (int i = 0; i < length; ++i) {
+        String_p += fillStr;
+    }
+    return String_p;
+}
 
 enum mMatrType{
     mmtNotMatr,
@@ -66,14 +86,14 @@ public:
     double  Minor(int row, int col); // Возвращает определитель М. минора для элемента
     mMatrix MMatr(); // Возвращает матрицу минора для элемента
     double  det();
-    mMatrix adMatr();
+    mMatrix adMatr();             // Матрица алгебраических дополнений
     double  ad(int row, int col); // Алгебраическое дополнение
     mMatrix inv();
 
-    bool isE();
-    bool isSqr();
+    bool isE();     // Единичная ли матрица?
+    bool isSqr();   // Квадратная ли матрица?
 
-    static mMatrix solve(mMatrix A, mMatrix B);
+    static mMatrix solve(mMatrix A, mMatrix B); // Решение матричного уровнения A*X=B
 
 
 public:

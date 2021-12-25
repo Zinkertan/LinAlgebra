@@ -83,7 +83,7 @@ void mMatrix::print()
 QString mMatrix::toQStr(QString sep,
                         QString format) const
 {
-    QStringLL dataInStr;
+    QList<QStringList> dataInStr;
     for (int i = 0; i < _rows; i++){
         QStringList rowStr;
         for (int j = 0; j < _columns; j++){

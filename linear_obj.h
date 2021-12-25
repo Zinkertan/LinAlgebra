@@ -9,90 +9,82 @@ typedef double* ptrarray_xy[2];
 typedef double array_xyz[3];
 typedef double* ptrarray_xyz[3];
 
-
+// Базовый класс
 class lObj
 {
 public:
-    lObj() {}
-
-    enum Axes_type{
+    enum Axes{
         x_ax = 0,
         y_ax,
         z_ax,
         LAST_ax,
     };
 
-    virtual void move_on(double on_x, double on_y, double on_z) = 0;
-    virtual void move_to(double nx, double ny, double nz) = 0;
+    enum dimensionType{
+        dim1 = 1,
+        dim2 = 2,
+        dim3 = 3
+    };
+
+    lObj(dimensionType dT):dim(dT) {}
+
+    dimensionType dim;
+
+
+//    virtual void move_on(double on_x, double on_y, double on_z){};
+//    virtual void move_to(double nx, double ny, double nz){};
 
     virtual ~lObj(){}
 };
 
-class lP2d : public lObj
-{
+// Точка 2D
+class lP2D : public lObj{
 public:
-    lP2d(double _x, double _y) { sP(_x, _y); }
-    lP2d(double C) : lP2d(C,C) {}
-    lP2d() : lP2d(0.0){}
-
-    lP2d(const lP2d & P){
+    double x = 0.0;
+    double y = 0.0;
+    lP2D(double _x, double _y): lObj(dim2),x(_x),y(_y){}
+    lP2D(): lP2D(0.0,0.0){}
+    lP2D(const lP2D & P):lP2D(){
         // Выполняем копирование значений
-        *(this->mData) = *(P.mData);
+        this->x = P.x;
+        this->y = P.y;
     }
+    virtual ~lP2D() override{}
 
-    lP2d& operator= (const lP2d &P)
+    lP2D& operator= (const lP2D &P)
     {
         // Проверка на самоприсваивание
         if (this == &P)
             return *this;
 
         // Выполняем копирование значений
-        *(this->mData) = *(P.mData);
+        lObj::operator = (P);
+        this->x = P.x;
+        this->y = P.y;
         // Возвращаем текущий объект
         return *this;
     }
 
-    friend lP2d operator-(const lP2d &P1, const lP2d &P2){
-        return lP2d (P1.x-P2.x,P1.y-P2.y);
+    friend lP2D operator-(const lP2D &P1, const lP2D &P2){
+        return lP2D (P1.x-P2.x,P1.y-P2.y);
     }
 
-    friend lP2d operator+(const lP2d &P1, const lP2d &P2){
-        return lP2d (P1.x+P2.x,P1.y+P2.y);
+    friend lP2D operator+(const lP2D &P1, const lP2D &P2){
+        return lP2D (P1.x+P2.x,P1.y+P2.y);
     }
 
-    friend lP2d operator*(const lP2d &P1, const double &num){
-        return lP2d (P1.x*num,P1.y*num);
+    friend lP2D operator*(const lP2D &P1, const double &num){
+        return lP2D (P1.x*num,P1.y*num);
     }
 
-    friend lP2d operator*=(const lP2d &P1, const double &num){
-        return lP2d (P1.x*num,P1.y*num);
+    friend lP2D operator*=(const lP2D &P1, const double &num){
+        return lP2D (P1.x*num,P1.y*num);
     }
-
-    virtual ~lP2d() override{}
 
     double * data() { return *mData;}
     const double * data() const { return *mData; }
     double & operator[](int i) { return *mData[i]; }
     double operator[](int i) const { return *mData[i]; }
-
-//    template<typename T>
-    void move_on(double on_x, double on_y, double on_z)   override {
-        _CRT_UNUSED(on_z);
-        sP(this->x+on_x,this->y+on_y);
-    }
-    void move_to(double _x, double _y, double _z)override {
-        _CRT_UNUSED(_z);
-        sP(_x,_y);
-    }
-
-    double x = 0.0;
-    double y = 0.0;
-
-protected:
-    void sP(double nx, double ny){
-        this->x = nx;
-        this->y = ny;
-    }
 
 private:
 
@@ -100,73 +92,57 @@ private:
 
 };
 
-class lP3d : public lObj
-{
+// Точка 3D
+class lP3D : public lObj{
 public:
-    lP3d(double _x, double _y, double _z) { sP(_x, _y, _z); }
-    lP3d(double C) : lP3d(C,C,C){}
-    lP3d() : lP3d(0.0) {}
-
-    lP3d(const lP3d & P){
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+    lP3D(double _x, double _y, double _z): lObj(dim3),x(_x),y(_y),z(_z){}
+    lP3D(): lP3D(0.0,0.0,0.0){}
+    lP3D(const lP3D & P):lP3D(){
         // Выполняем копирование значений
-        *(this->mData) = *(P.mData);
+        this->x = P.x;
+        this->y = P.y;
+        this->z = P.z;
     }
+    virtual ~lP3D() override{}
 
-    lP3d& operator= (const lP3d &P)
+    lP3D& operator= (const lP3D &P)
     {
         // Проверка на самоприсваивание
         if (this == &P)
             return *this;
 
-        // Выполняем копирование значений
-        *(this->mData) = *(P.mData);
+        // Выполняем копирование значений (обязательно переменных, нельзя массив с сылками =( )
+        lObj::operator = (P);
+        this->x = P.x;
+        this->y = P.y;
+        this->z = P.z;
         // Возвращаем текущий объект
         return *this;
     }
 
-    friend lP3d operator-(const lP3d &P1, const lP3d &P2){
-        return lP3d (P1.x-P2.x,P1.y-P2.y,P1.z-P2.z);
+    friend lP3D operator-(const lP3D &P1, const lP3D &P2){
+        return lP3D (P1.x-P2.x,P1.y-P2.y,P1.z-P2.z);
     }
 
-    friend lP3d operator+(const lP3d &P1, const lP3d &P2){
-        return lP3d (P1.x+P2.x,P1.y+P2.y,P1.z+P2.z);
+    friend lP3D operator+(const lP3D &P1, const lP3D &P2){
+        return lP3D (P1.x+P2.x,P1.y+P2.y,P1.z+P2.z);
     }
 
-    friend lP3d operator*(const lP3d &P1, const double &num){
-        return lP3d (P1.x*num,P1.y*num,P1.z*num);
+    friend lP3D operator*(const lP3D &P1, const double &num){
+        return lP3D (P1.x*num,P1.y*num,P1.z*num);
     }
 
-    friend lP3d operator*=(const lP3d &P1, const double &num){
-        return lP3d (P1.x*num,P1.y*num,P1.z*num);
+    friend lP3D operator*=(const lP3D &P1, const double &num){
+        return lP3D (P1.x*num,P1.y*num,P1.z*num);
     }
-
-    virtual ~lP3d() override{}
 
     double * data() { return *mData;}
     const double * data() const { return *mData; }
     double & operator[](int i) { return *mData[i]; }
     double operator[](int i) const { return *mData[i]; }
-
-//    template<typename T>
-    void move_on(double on_x, double on_y, double on_z)   override {
-        sP(this->x+on_x,this->y+on_y,this->z+on_z);
-    }
-    void move_to(double _x, double _y, double _z) override {
-        sP(_x,_y,_z);
-    }
-
-    double x = 0.0;
-    double y = 0.0;
-    double z = 0.0;
-
-protected:
-    void sP(double nx, double ny, double nz){
-        this->x = nx;
-        this->y = ny;
-        this->z = nz;
-    }
-
-
 
 private:
 
@@ -174,107 +150,263 @@ private:
 
 };
 
-class l_P_array : public lObj
+//Вектор 2D
+class lV2D : public lObj
 {
+    bool fixed = false;
+
 public:
-    l_P_array () : lObj() {}
-    l_P_array (double nx, double ny, double nz) : lObj(),Pb(nx,ny,nz){}
-    l_P_array (lP3d P) : lObj(),Pb(P){}
+    lP2D p = lP2D(0.0,0.0);
+    double x = 0.0;
+    double y = 0.0;
+    lV2D(double _x, double _y): lObj(dim2),fixed(false),x(_x),y(_y){}
 
-
-
-    l_P_array(const l_P_array & P_a){
-        // Выполняем копирование значений
-        this->Pb = P_a.Pb;
+    lV2D(lP2D p1, lP2D p2, bool isToFix = true): lObj(dim2),fixed(isToFix){
+        setP1P2(p1,p2,isToFix);
     }
 
-    l_P_array& operator= (const l_P_array &P_a)
+    lV2D(): lV2D(0.0,0.0){}
+    lV2D(const lV2D & P):lV2D(){
+        // Выполняем копирование значений
+        x     = P.x    ;
+        y     = P.y    ;
+        p     = P.p    ;
+        fixed = P.fixed;
+    }
+    virtual ~lV2D() override{}
+
+    lV2D& operator= (const lV2D &P)
     {
         // Проверка на самоприсваивание
-        if (this == &P_a)
+        if (this == &P)
             return *this;
 
         // Выполняем копирование значений
-        this->Pb = P_a.Pb;
+        lObj::operator = (P);
+        x     = P.x    ;
+        y     = P.y    ;
+        p     = P.p    ;
+        fixed = P.fixed;
         // Возвращаем текущий объект
         return *this;
     }
 
-    virtual void move_on(double on_x, double on_y, double on_z) override {
-        Pb.move_on(on_x,on_y,on_z);
-    }
-    virtual void move_to(double nx, double ny, double nz)override {
-        Pb.move_to(nx,ny,nz);
+
+    friend lV2D operator+(const lV2D &V1, const lV2D &V2){
+        return lV2D (V1.x+V2.x,V1.y+V2.y);
     }
 
-    virtual ~l_P_array() override{}
+    friend lV2D operator-(const lV2D &V1, const lV2D &V2){
+        return V1+(-1.0*V2);
+    }
 
-    virtual double len() = 0;
-    virtual void resize(double ratio) = 0;
-    virtual void turn(int ax_type, double angle) = 0;
-    void sPb(lP3d P){this->Pb = P;}
-    lP3d gPb(){return this->Pb;}
-protected:
+    friend lV2D operator*(const lV2D &V1, const double &num){
+        return lV2D (V1.x*num,V1.y*num);
+    }
+
+    friend lV2D operator*(const double &num, const lV2D &V1){
+        return lV2D (V1.x*num,V1.y*num);
+    }
+
+    friend lV2D operator*=(const lV2D &V1, const double &num){
+        return lV2D (V1.x*num,V1.y*num);
+    }
+
+    void setP1P2(lP2D p1, lP2D p2, bool isToFix = true){
+        x = p2.x - p1.x;
+        y = p2.y - p1.y;
+        fixed = isToFix;
+        if (isToFix) {
+            p = p1;
+        }
+    }
+
+
+    double len(){
+        double sum2 = 0;
+        for (int i = 0; i < dim2; ++i) {
+            sum2 += pow(*mData[i],2);
+        }
+        return sqrt(sum2);
+    }
+
+    double * data() { return *mData;}
+    const double * data() const { return *mData; }
+    double & operator[](int i) { return *mData[i]; }
+    double operator[](int i) const { return *mData[i]; }
+
 private:
-    lP3d Pb = lP3d(0.0); // Хранит положение объекта относительно начальной точки
+    ptrarray_xy mData = {&this->x,&this->y};
+
+};
+
+//Вектор 3D
+class lV3D : public lObj
+{
+    bool fixed = false;
+
+public:
+    lP3D p = lP3D(0.0,0.0,0.0);
+    double x = 0.0;
+    double y = 0.0;
+    double z = 0.0;
+    lV3D(double _x, double _y, double _z): lObj(dim3),fixed(false),x(_x),y(_y),z(_z){}
+
+    lV3D(lP3D p1, lP3D p2, bool isToFix = true): lObj(dim3),fixed(isToFix){
+        setP1P2(p1,p2,isToFix);
+    }
+
+    lV3D(): lV3D(0.0,0.0,0.0){}
+    lV3D(const lV3D & P):lV3D(){
+        // Выполняем копирование значений
+        x     = P.x    ;
+        y     = P.y    ;
+        z     = P.z    ;
+        p     = P.p    ;
+        fixed = P.fixed;
+    }
+    virtual ~lV3D() override{}
+
+    lV3D& operator= (const lV3D &P)
+    {
+        // Проверка на самоприсваивание
+        if (this == &P)
+            return *this;
+
+        // Выполняем копирование значений
+        lObj::operator = (P);
+        x     = P.x    ;
+        y     = P.y    ;
+        z     = P.z    ;
+        p     = P.p    ;
+        fixed = P.fixed;
+        // Возвращаем текущий объект
+        return *this;
+    }
+
+
+    friend lV3D operator+(const lV3D &V1, const lV3D &V2){
+        return lV3D (V1.x+V2.x,V1.y+V2.y,V1.z+V2.z);
+    }
+
+    friend lV3D operator-(const lV3D &V1, const lV3D &V2){
+        return V1+(-1.0*V2);
+    }
+
+    friend lV3D operator*(const lV3D &V1, const double &num){
+        return lV3D (V1.x*num,V1.y*num,V1.z*num);
+    }
+
+    friend lV3D operator*(const double &num, const lV3D &V1){
+        return lV3D (V1.x*num,V1.y*num,V1.z*num);
+    }
+
+    friend lV3D operator*=(const lV3D &V1, const double &num){
+        return lV3D (V1.x*num,V1.y*num,V1.z*num);
+    }
+
+    void setP1P2(lP3D p1, lP3D p2, bool isToFix = true){
+        x = p2.x - p1.x;
+        y = p2.y - p1.y;
+        z = p2.z - p1.z;
+        fixed = isToFix;
+        if (isToFix) {
+            p = p1;
+        }
+    }
+
+
+    double len(){
+        double sum2 = 0;
+        for (int i = 0; i < dim3; ++i) {
+            sum2 += pow(*mData[i],2);
+        }
+        return sqrt(sum2);
+    }
+
+    double * data() { return *mData;}
+    const double * data() const { return *mData; }
+    double & operator[](int i) { return *mData[i]; }
+    double operator[](int i) const { return *mData[i]; }
+
+private:
+    ptrarray_xyz mData = {&this->x,&this->y,&this->z};
+
+};
+
+//Отрезок 2D
+class lS2D : public lObj
+{
+public:
+    lP2D p1,p2;
+    lS2D(lP2D _p1, lP2D _p2): lObj(dim2),p1(_p1),p2(_p2){}
+
+    double len(){
+        double sum2 = 0;
+        for (int i = 0; i < 2; ++i) {
+            sum2 += pow(p1[i]-p2[i],2);
+        }
+        return sqrt(sum2);
+    }
+
 
 };
 
 //___Отрезок выходящий из базовой точки в некоторую т. Pe
-class l_BLine : public  l_P_array
-{
-public:
-    l_BLine () {}
-    l_BLine (lP3d Pb) : l_P_array (Pb) {}
-    l_BLine (lP3d Pb,lP3d P_external) : l_BLine(Pb) {
-        this->Pe = P_external;
-    }
+//class l_BLine : public  lObj
+//{
+//public:
+//    l_BLine () {}
+//    l_BLine (lP3d Pb) : l_P_array (Pb) {}
+//    l_BLine (lP3d Pb,lP3d P_external) : l_BLine(Pb) {
+//        this->Pe = P_external;
+//    }
 
-    virtual ~l_BLine() override{}
+//    virtual ~l_BLine() override{}
 
-    virtual double len() override{
-        double sum2 = 0;
-        for (int i = 0; i < lObj::LAST_ax; ++i) {
-            sum2 += pow(Pe[i],2);
-        }
-        return sqrt(sum2);
-    }
-    virtual void resize(double ratio) override{
-         Pe *= ratio; //Почему-то работает просто присвоение!!!
+//    virtual double len() override{
+//        double sum2 = 0;
+//        for (int i = 0; i < lObj::LAST_ax; ++i) {
+//            sum2 += pow(Pe[i],2);
+//        }
+//        return sqrt(sum2);
+//    }
+//    virtual void resize(double ratio) override{
+//         Pe *= ratio; //Почему-то работает просто присвоение!!!
 
-    }
-    void turn(int ax_type, double angle)override{
+//    }
+//    void turn(int ax_type, double angle)override{
 
-    }
+//    }
 
-protected:
-    lP3d Pe; // хранит координату дополнительной точки
-private:
-
-
-
-
-};
-
-class l_Line : public  l_P_array
-{
-public:
-    l_Line () {}
-    l_Line (lP3d Pb) : l_P_array (Pb) {}
-
-
-    virtual ~l_Line() override{}
-
-    void resize(double size);
-    void turn(int ax_type, double angle);
-protected:
-    lP3d P1,P2;
-private:
+//protected:
+//    lP3d Pe; // хранит координату дополнительной точки
+//private:
 
 
 
 
-};
+//};
+
+//class l_Line : public  l_P_array
+//{
+//public:
+//    l_Line () {}
+//    l_Line (lP3d Pb) : l_P_array (Pb) {}
+
+
+//    virtual ~l_Line() override{}
+
+//    void resize(double size);
+//    void turn(int ax_type, double angle);
+//protected:
+//    lP3d P1,P2;
+//private:
+
+
+
+
+//};
 
 //class l_Vector : public  l_line
 //{
