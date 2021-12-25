@@ -101,12 +101,21 @@ QString test::test_mAlg()
 QString test::test_anGeom()
 {
     QString out = "";
-    lP2D A (0.0,0.0);
-    lP2D B (3.0,3.0);
+    lP2D A (2.0,1.0);
+    lP2D B (-2.0,3.0);
+    out += QString("A(%1,%2)\n")
+            .arg(A.x)
+            .arg(A.y);
+    out += QString("B(%1,%2)\n")
+            .arg(B.x)
+            .arg(B.y);
 
     lV2D a (A,B);
 
-    out += QString("%1").arg(a.len());
+    out += QString("AB(a)(%1,%2), len = %3\n")
+            .arg(a.x)
+            .arg(a.y)
+            .arg(a.len());
 
     return out;
 

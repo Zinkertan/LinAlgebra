@@ -212,6 +212,23 @@ public:
         return lV2D (V1.x*num,V1.y*num);
     }
 
+    //Скаляроное умножение
+    static double dot(const lV2D &v1, const lV2D &v2){
+        return v1.x*v2.x + v1.y*v2.y;
+    }
+
+    double dot(const lV2D &v2) const{
+        return dot(*this,v2) ;
+    }
+
+    static double angle(const lV2D &v1, const lV2D &v2){
+        return acos(dot(v1,v2)/(v1.len()*v2.len()));
+    }
+
+    double angle(const lV2D &v2) const{
+        return angle(*this,v2) ;
+    }
+
     void setP1P2(lP2D p1, lP2D p2, bool isToFix = true){
         x = p2.x - p1.x;
         y = p2.y - p1.y;
@@ -221,8 +238,19 @@ public:
         }
     }
 
+    void setPoint(lP2D p1){
+        p = p1;
+    }
 
-    double len(){
+    static bool isOrt(const lV2D &v1, const lV2D &v2, double tol = 1e-6){
+        return fabs(angle(v1,v2))<tol?true:false;
+    }
+
+    bool isOrt(const lV2D &v2, double tol = 1e-6) const{
+        return isOrt(*this,v2,tol);
+    }
+
+    double len() const{
         double sum2 = 0;
         for (int i = 0; i < dim2; ++i) {
             sum2 += pow(*mData[i],2);
@@ -305,6 +333,23 @@ public:
         return lV3D (V1.x*num,V1.y*num,V1.z*num);
     }
 
+    //Скаляроное умножение
+    static double dot(lV3D v1, lV3D v2){
+        return v1.x*v2.x + v1.y*v2.y + v1.z*v2.z ;
+    }
+
+    double dot(const lV3D &v2) const{
+        return dot(*this,v2) ;
+    }
+
+    static double angle(const lV3D &v1, const lV3D &v2){
+        return acos(dot(v1,v2)/(v1.len()*v2.len()));
+    }
+
+    double angle(const lV3D &v2) const{
+        return angle(*this,v2) ;
+    }
+
     void setP1P2(lP3D p1, lP3D p2, bool isToFix = true){
         x = p2.x - p1.x;
         y = p2.y - p1.y;
@@ -315,8 +360,19 @@ public:
         }
     }
 
+    void setPoint(lP3D p1){
+        p = p1;
+    }
 
-    double len(){
+    static bool isOrt(const lV3D &v1, const lV3D &v2, double tol = 1e-6){
+        return fabs(angle(v1,v2))<tol?true:false;
+    }
+
+    bool isOrt(const lV3D &v2, double tol = 1e-6) const{
+        return isOrt(*this,v2,tol);
+    }
+
+    double len()const{
         double sum2 = 0;
         for (int i = 0; i < dim3; ++i) {
             sum2 += pow(*mData[i],2);
