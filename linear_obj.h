@@ -150,6 +150,39 @@ private:
 
 };
 
+//Отрезок 2D
+class lS2D : public lObj
+{
+public:
+    lP2D p1,p2;
+    lS2D(lP2D _p1, lP2D _p2): lObj(dim2),p1(_p1),p2(_p2){}
+
+    double len() const{
+        double sum2 = 0;
+        for (int i = 0; i < dim2; ++i) {
+            sum2 += pow(p1[i]-p2[i],2);
+        }
+        return sqrt(sum2);
+    }
+};
+
+//Отрезок 3D
+class lS3D : public lObj
+{
+public:
+    lP3D p1,p2;
+    lS3D(lP3D _p1, lP3D _p2): lObj(dim3),p1(_p1),p2(_p2){}
+
+    double len() const{
+        double sum2 = 0;
+        for (int i = 0; i < dim3; ++i) {
+            sum2 += pow(p1[i]-p2[i],2);
+        }
+        return sqrt(sum2);
+    }
+};
+
+
 //Вектор 2D
 class lV2D : public lObj
 {
@@ -160,6 +193,8 @@ public:
     double x = 0.0;
     double y = 0.0;
     lV2D(double _x, double _y): lObj(dim2),fixed(false),x(_x),y(_y){}
+
+    lV2D(double _x, double _y, lP2D _p): lObj(dim2),fixed(false),x(_x),y(_y),p(_p){}
 
     lV2D(lP2D p1, lP2D p2, bool isToFix = true): lObj(dim2),fixed(isToFix){
         setP1P2(p1,p2,isToFix);
@@ -229,6 +264,15 @@ public:
         return angle(*this,v2) ;
     }
 
+    // Проекция вектора v2 на вектор v1
+    static double proj(const lV2D &v1, const lV2D &v2){
+        return dot(v1,v2)/(v1.len());
+    }
+
+    double proj(const lV2D &v2) const{
+        return proj(*this,v2) ;//cos(a)*v2.len()
+    }
+
     void setP1P2(lP2D p1, lP2D p2, bool isToFix = true){
         x = p2.x - p1.x;
         y = p2.y - p1.y;
@@ -242,8 +286,16 @@ public:
         p = p1;
     }
 
+    static bool isСollinear(const lV2D &v1, const lV2D &v2, double tol = 1e-6){
+        return fabs(v1.x/v2.x-v1.y/v2.y)<tol?true:false;
+    }
+
+    bool isСollinear(const lV2D &v2, double tol = 1e-6) const{
+        return isСollinear(*this,v2,tol);
+    }
+
     static bool isOrt(const lV2D &v1, const lV2D &v2, double tol = 1e-6){
-        return fabs(angle(v1,v2))<tol?true:false;
+        return fabs(dot(v1,v2))<tol?true:false;
     }
 
     bool isOrt(const lV2D &v2, double tol = 1e-6) const{
@@ -257,6 +309,20 @@ public:
         }
         return sqrt(sum2);
     }
+
+    // Направляющий косинус вектор
+    lV2D dirVector(bool toFix = false) const{
+        if (!toFix) {
+            return lV2D(x/len(),y/len());
+        } else {
+            return lV2D(x/len(),y/len(),p);
+        }
+    }
+
+    lV2D dirVector(lP2D newPoint) const{
+        return lV2D(x/len(),y/len(),newPoint);
+    }
+
 
     double * data() { return *mData;}
     const double * data() const { return *mData; }
@@ -279,6 +345,8 @@ public:
     double y = 0.0;
     double z = 0.0;
     lV3D(double _x, double _y, double _z): lObj(dim3),fixed(false),x(_x),y(_y),z(_z){}
+
+    lV3D(double _x, double _y, double _z, lP3D _p): lObj(dim3),fixed(true),x(_x),y(_y),z(_z),p(_p){}
 
     lV3D(lP3D p1, lP3D p2, bool isToFix = true): lObj(dim3),fixed(isToFix){
         setP1P2(p1,p2,isToFix);
@@ -350,6 +418,15 @@ public:
         return angle(*this,v2) ;
     }
 
+    // Проекция вектора v2 на вектор v1
+    static double proj(const lV3D &v1, const lV3D &v2){
+        return dot(v1,v2)/(v1.len());
+    }
+
+    double proj(const lV3D &v2) const{
+        return proj(*this,v2) ;//cos(a)*v2.len()
+    }
+
     void setP1P2(lP3D p1, lP3D p2, bool isToFix = true){
         x = p2.x - p1.x;
         y = p2.y - p1.y;
@@ -364,8 +441,19 @@ public:
         p = p1;
     }
 
+    static bool isСollinear(const lV3D &v1, const lV3D &v2, double tol = 1e-6){
+        double  o_x = v1.x/v2.x,
+                o_y = v1.y/v2.y,
+                o_z = v1.z/v2.z;
+        return fabs(o_x-o_y)<tol && fabs(o_y-o_z)<tol && fabs(o_z-o_x)<tol?true:false;
+    }
+
+    bool isСollinear(const lV3D &v2, double tol = 1e-6) const{
+        return isСollinear(*this,v2,tol);
+    }
+
     static bool isOrt(const lV3D &v1, const lV3D &v2, double tol = 1e-6){
-        return fabs(angle(v1,v2))<tol?true:false;
+        return fabs(dot(v1,v2))<tol?true:false;
     }
 
     bool isOrt(const lV3D &v2, double tol = 1e-6) const{
@@ -380,6 +468,19 @@ public:
         return sqrt(sum2);
     }
 
+    // Направляющий косинус вектор
+    lV3D dirVector(bool toFix = false) const{
+        if (!toFix) {
+            return lV3D(x/len(),y/len(),z/len());
+        } else {
+            return lV3D(x/len(),y/len(),z/len(),p);
+        }
+    }
+
+    lV3D dirVector(lP3D newPoint) const{
+        return lV3D(x/len(),y/len(),z/len(),newPoint);
+    }
+
     double * data() { return *mData;}
     const double * data() const { return *mData; }
     double & operator[](int i) { return *mData[i]; }
@@ -390,23 +491,7 @@ private:
 
 };
 
-//Отрезок 2D
-class lS2D : public lObj
-{
-public:
-    lP2D p1,p2;
-    lS2D(lP2D _p1, lP2D _p2): lObj(dim2),p1(_p1),p2(_p2){}
 
-    double len(){
-        double sum2 = 0;
-        for (int i = 0; i < 2; ++i) {
-            sum2 += pow(p1[i]-p2[i],2);
-        }
-        return sqrt(sum2);
-    }
-
-
-};
 
 //___Отрезок выходящий из базовой точки в некоторую т. Pe
 //class l_BLine : public  lObj
