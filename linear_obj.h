@@ -741,190 +741,190 @@ public:
     }
 };
 
-//Плоскость 3D
-class lPlain : public lObj
-{
-    //Не обязательно конкретная плоскость связанная с СК, просто параллельная
-    enum PlainType{
-        Oxyz,
-        Oxy,
-        Oyz,
-        Oxz
-    };
+////Плоскость 3D
+//class lPlain : public lObj
+//{
+//    //Не обязательно конкретная плоскость связанная с СК, просто параллельная
+//    enum PlainType{
+//        Oxyz,
+//        Oxy,
+//        Oyz,
+//        Oxz
+//    };
 
-    enum CollinearType{
-        Cxyz,
-        Cx,
-        Cy,
-        Cz,
-        Cxy,
-        Cyz,
-        Cxz
-    };
+//    enum CollinearType{
+//        Cxyz,
+//        Cx,
+//        Cy,
+//        Cz,
+//        Cxy,
+//        Cyz,
+//        Cxz
+//    };
 
 
-    PlainType O = Oxyz;
-    CollinearType CT = Cxyz;
+//    PlainType O = Oxyz;
+//    CollinearType CT = Cxyz;
 
-public:
-    double A = 0.0;
-    double B = 0.0;
-    double C = 0.0;
-    double D = 0.0;
-    lPlain(double _A, double _B, double _C, double _D): lObj(dim3),A(_A),B(_B),C(_C),D(_D){checkType();}
-    lPlain(lV3D normVector, lP3D point): lObj(dim3){
-        setWithNVP(normVector,point);
-        checkType();
-    }
-    lPlain(lV3D normFixedVector): lObj(dim3){
-        setWithNFixedV(normFixedVector);
-        checkType();
-    }
-    lPlain(lP3D p1, lP3D p2): lObj(dim3){
-        setWithNFixedV(lV3D(p1,p2));
-        checkType();
-    }
-    lPlain(lP3D p1, lP3D p2, lP3D p3): lObj(dim3){
-        setWithNFixedV(lV3D(p1,p2));
-        checkType();
-    }
+//public:
+//    double A = 0.0;
+//    double B = 0.0;
+//    double C = 0.0;
+//    double D = 0.0;
+//    lPlain(double _A, double _B, double _C, double _D): lObj(dim3),A(_A),B(_B),C(_C),D(_D){checkType();}
+//    lPlain(lV3D normVector, lP3D point): lObj(dim3){
+//        setWithNVP(normVector,point);
+//        checkType();
+//    }
+//    lPlain(lV3D normFixedVector): lObj(dim3){
+//        setWithNFixedV(normFixedVector);
+//        checkType();
+//    }
+//    lPlain(lP3D p1, lP3D p2): lObj(dim3){
+//        setWithNFixedV(lV3D(p1,p2));
+//        checkType();
+//    }
+//    lPlain(lP3D p1, lP3D p2, lP3D p3): lObj(dim3){
+//        setWithNFixedV(lV3D(p1,p2));
+//        checkType();
+//    }
 
-    lPlain(): lPlain(0.0,0.0,0.0,0.0){}
-    lPlain(const lPlain & Pl):lPlain(){
-        // Выполняем копирование значений
-        A     = Pl.A    ;
-        B     = Pl.B    ;
-        C     = Pl.C    ;
-    }
-    virtual ~lPlain() override{}
+//    lPlain(): lPlain(0.0,0.0,0.0,0.0){}
+//    lPlain(const lPlain & Pl):lPlain(){
+//        // Выполняем копирование значений
+//        A     = Pl.A    ;
+//        B     = Pl.B    ;
+//        C     = Pl.C    ;
+//    }
+//    virtual ~lPlain() override{}
 
-    lPlain& operator= (const lPlain &Pl)
-    {
-        // Проверка на самоприсваивание
-        if (this == &Pl)
-            return *this;
+//    lPlain& operator= (const lPlain &Pl)
+//    {
+//        // Проверка на самоприсваивание
+//        if (this == &Pl)
+//            return *this;
 
-        // Выполняем копирование значений
-        lObj::operator = (Pl);
-        A     = Pl.A    ;
-        B     = Pl.B    ;
-        C     = Pl.C    ;
-        // Возвращаем текущий объект
-        return *this;
-    }
+//        // Выполняем копирование значений
+//        lObj::operator = (Pl);
+//        A     = Pl.A    ;
+//        B     = Pl.B    ;
+//        C     = Pl.C    ;
+//        // Возвращаем текущий объект
+//        return *this;
+//    }
 
-    void checkType(){
-        if (fabs(A)<glTol) CT = Cx;
-        if (fabs(B)<glTol) CT = Cy;
-        if (fabs(C)<glTol) CT = Cz;
-        if (fabs(A)<glTol  && fabs(B)<glTol ) {
-            O = Oxy;
-            CT = Cxy;
-        }
-        if (fabs(B)<glTol  && fabs(C)<glTol ) {
-            O = Oyz;
-            CT = Cyz;
-        }
-        if (fabs(C)<glTol  && fabs(A)<glTol ) {
-            O = Oxz;
-            CT = Cxz;
-        }
-    }
+//    void checkType(){
+//        if (fabs(A)<glTol) CT = Cx;
+//        if (fabs(B)<glTol) CT = Cy;
+//        if (fabs(C)<glTol) CT = Cz;
+//        if (fabs(A)<glTol  && fabs(B)<glTol ) {
+//            O = Oxy;
+//            CT = Cxy;
+//        }
+//        if (fabs(B)<glTol  && fabs(C)<glTol ) {
+//            O = Oyz;
+//            CT = Cyz;
+//        }
+//        if (fabs(C)<glTol  && fabs(A)<glTol ) {
+//            O = Oxz;
+//            CT = Cxz;
+//        }
+//    }
 
-    void setWithNVP(lV3D vec, lP3D point){
-        double mn = (vec.y>0)?1:-1;
-        A = mn*vec.y;
-        B = mn*-vec.x;
-        assert(A != 0.0);
-        assert(B != 0.0);
-        if (A==0.0) {
-            O = Ox;
-        } else if (B==0.0){
-            O = Oy;
-        } else {
-            O = Oxy;
-        }
-        C = mn*(vec.x*point.y-vec.y*point.x);
-    }
+//    void setWithNVP(lV3D vec, lP3D point){
+//        double mn = (vec.y>0)?1:-1;
+//        A = mn*vec.y;
+//        B = mn*-vec.x;
+//        assert(A != 0.0);
+//        assert(B != 0.0);
+//        if (A==0.0) {
+//            O = Ox;
+//        } else if (B==0.0){
+//            O = Oy;
+//        } else {
+//            O = Oxy;
+//        }
+//        C = mn*(vec.x*point.y-vec.y*point.x);
+//    }
 
-    void setWithNFixedV(lV3D vec){
-        assert(vec.isFixed());
-        double mn = (vec.y>0)?1:-1;
-        A = mn*vec.y;
-        B = mn*-vec.x;
-        assert(A != 0.0);
-        assert(B != 0.0);
+//    void setWithNFixedV(lV3D vec){
+//        assert(vec.isFixed());
+//        double mn = (vec.y>0)?1:-1;
+//        A = mn*vec.y;
+//        B = mn*-vec.x;
+//        assert(A != 0.0);
+//        assert(B != 0.0);
 
-        if (A==0.0) {
-            O = Ox;
-        } else if (B==0.0){
-            O = Oy;
-        } else {
-            O = Oxy;
-        }
-        C = mn*(vec.x*vec.p.y-vec.y*vec.p.x);
-    }
+//        if (A==0.0) {
+//            O = Ox;
+//        } else if (B==0.0){
+//            O = Oy;
+//        } else {
+//            O = Oxy;
+//        }
+//        C = mn*(vec.x*vec.p.y-vec.y*vec.p.x);
+//    }
 
-    void setWithVectors(lV3D V1, lV3D V2){
-        assert(vec.isFixed());
-        double mn = (vec.y>0)?1:-1;
-        A = mn*vec.y;
-        B = mn*-vec.x;
-        assert(A != 0.0);
-        assert(B != 0.0);
+//    void setWithVectors(lV3D V1, lV3D V2){
+//        assert(vec.isFixed());
+//        double mn = (vec.y>0)?1:-1;
+//        A = mn*vec.y;
+//        B = mn*-vec.x;
+//        assert(A != 0.0);
+//        assert(B != 0.0);
 
-        if (A==0.0) {
-            O = Ox;
-        } else if (B==0.0){
-            O = Oy;
-        } else {
-            O = Oxy;
-        }
-        C = mn*(vec.x*vec.p.y-vec.y*vec.p.x);
-    }
+//        if (A==0.0) {
+//            O = Ox;
+//        } else if (B==0.0){
+//            O = Oy;
+//        } else {
+//            O = Oxy;
+//        }
+//        C = mn*(vec.x*vec.p.y-vec.y*vec.p.x);
+//    }
 
-    double y(double x)const{
-        switch (O) {
-        case Ox:{return -C/B;}break;
-        case Oy:{return rand()-rand();}break;
-        case Oxy:{return -A/B*x-C/B;}break;
-        }
+//    double y(double x)const{
+//        switch (O) {
+//        case Ox:{return -C/B;}break;
+//        case Oy:{return rand()-rand();}break;
+//        case Oxy:{return -A/B*x-C/B;}break;
+//        }
 
-    }
-    double x(double y)const{
-        switch (O) {
-        case Ox:{return rand()-rand();}break;
-        case Oy:{return -C/A;}break;
-        case Oxy:{return -B/A*y-C/A;}break;
-        }
+//    }
+//    double x(double y)const{
+//        switch (O) {
+//        case Ox:{return rand()-rand();}break;
+//        case Oy:{return -C/A;}break;
+//        case Oxy:{return -B/A*y-C/A;}break;
+//        }
 
-    }
+//    }
 
-    QVdouble xy(double t)const{
-        switch (O) {
-        case Ox:{return {-C/B,t};}break;
-        case Oy:{return {t,-C/A};}break;
-        case Oxy:{return {-B*t,A*t+y(0)};}break;
-        }
+//    QVdouble xy(double t)const{
+//        switch (O) {
+//        case Ox:{return {-C/B,t};}break;
+//        case Oy:{return {t,-C/A};}break;
+//        case Oxy:{return {-B*t,A*t+y(0)};}break;
+//        }
 
-    }
+//    }
 
-    lV2D vec ()const{ return lV2D(-B,A); }
+//    lV2D vec ()const{ return lV2D(-B,A); }
 
-    lV2D norm ()const{ return lV2D(A,B); }
+//    lV2D norm ()const{ return lV2D(A,B); }
 
-    lP2D Mx ()const{return lP2D(-C/A,0);}
-    lP2D My ()const{return lP2D(0,-C/B);}
+//    lP2D Mx ()const{return lP2D(-C/A,0);}
+//    lP2D My ()const{return lP2D(0,-C/B);}
 
-    bool isPoint(lP2D p, double tol = 1e-6){
-        return (fabs(A*p.x+B*p.y+C)<tol)?true:false;
-    }
+//    bool isPoint(lP2D p, double tol = 1e-6){
+//        return (fabs(A*p.x+B*p.y+C)<tol)?true:false;
+//    }
 
-    QString toQStr() const{
-        QString tmp = "line %1x + %2y + %3 = 0";
-        return tmp.arg(A).arg(B).arg(C);
-    }
-};
+//    QString toQStr() const{
+//        QString tmp = "line %1x + %2y + %3 = 0";
+//        return tmp.arg(A).arg(B).arg(C);
+//    }
+//};
 
 
 #endif // LINEAR_OBJ_H

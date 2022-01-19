@@ -29,6 +29,26 @@ mMatrix::mMatrix(QVVdouble matr):
     }
 }
 
+mMatrix::mMatrix(std::initializer_list<std::initializer_list<double> > matr)
+{
+    QVVdouble newData;
+    for (auto vec : matr) {
+        newData.append(QVdouble(vec));
+    }
+    data = newData;
+    _rows = newData.size();
+    _columns = newData.at(0).size();
+    if (_rows == _columns) {
+        _dim = _rows;
+        _type = mmtSquare;
+    }
+    for (int i = 0; i < _rows; ++i) {
+        if (data.at(i).length()!=_columns){
+            _type = mmtNotMatr;
+        }
+    }
+}
+
 mMatrix::mMatrix(const mMatrix &matr):
         data(matr.data),
         _rows(matr._rows),
@@ -99,6 +119,11 @@ void mMatrix::copymMatrix(const mMatrix &matr)
     }
 
     this->data = matr.data;
+
+    this->_rows     = matr._rows;
+    this->_columns  = matr._columns;
+    this->_type     = matr._type;
+    this->_dim      = matr._dim;
 }
 
 void mMatrix::resizeAndCopymMatrix(const mMatrix &matr)
@@ -489,32 +514,72 @@ std::istream & operator>>(std::istream & istream, mMatrix & number)
     return istream;
 }
 
+mVector mVector::operator+(const mVector & second)
+{
+    if (this->vType == second.vType) {
+        if (this->len()!= second.len())
+        {
+            assert(this->len()==second.len());
+            throw std::logic_error("Wrong sizes");
+        }
+    }
+    mVector newV(this->len(),this->vType);
+
+    for(int i = 0; i < this->len(); i++){
+        newV[i] = this->at(i) + second[i];
+    }
+
+    return newV;
+}
+
+mVector mVector::operator*(const double & num)
+{
+    mVector newV(this->len(),this->vType);
+
+    for(int i = 0; i < this->len(); i++){
+        newV[i] = this->at(i) * num;
+    }
+
+    return newV;
+}
+
+mVector mVector::operator-(const mVector & second)
+{
+    return mVector::operator+(-1.0*second);
+}
+
+
+mVector mVector::operator/(const double &num)
+{
+    return mVector::operator*(1.0/num);
+}
+
 mVector operator*(const double num, const mVector &Vec)
 {
 
-    mVector newM = Vec;
+    mVector outV(Vec.len(),Vec.vType);
 
     for(int r = 0; r < Vec.rowLen(); r++){
         for(int c = 0; c < Vec.colLen(); c++){
-            newM(r,c) = num*Vec(r,c);
+            outV(r,c) = num*Vec(r,c);
         }
     }
 
-    return newM;
+    return outV;
 }
 
 mVector operator*(const mVector &Vec, const double num)
 {
 
-    mVector newM = Vec;
+    mVector outV(Vec.len(),Vec.vType);
 
     for(int r = 0; r < Vec.rowLen(); r++){
         for(int c = 0; c < Vec.colLen(); c++){
-            newM(r,c) = num*Vec(r,c);
+            outV(r,c) = num*Vec(r,c);
         }
     }
 
-    return newM;
+    return outV;
 }
 
 mMatrix operator*(const mMatrix &Matr, const mVector &Vec)
@@ -567,26 +632,37 @@ mMatrix operator*(const mVector &Vec , const mMatrix &Matr)
 
 mMatrix operator*(const mVector &Vec1 , const mVector &Vec2)
 {
-    if (Vec2.rowLen()!= Vec1.colLen())
-    {
-        assert(Vec1.colLen()==Vec2.rowLen());
-        throw std::logic_error("Wrong sizes");
-    }
 
-    mMatrix newM(Vec1.rowLen(), Vec2.colLen());
-
-    for(int r = 0; r < Vec1.rowLen(); r++){
-        for(int c = 0; c < Vec2.colLen(); c++){
-            double elem(0.0);
-            for(int i = 0; i < Vec1.colLen(); i++){
-                elem += Vec1(r,i) * Vec2(i,c) ;
-
-            }
-            newM(r,c) = elem;
+    if (Vec1.vType == Vec2.vType) {
+        if (Vec2.len()!= Vec1.len())
+        {
+            assert(Vec1.len()==Vec2.len());
+            throw std::logic_error("Wrong sizes");
         }
+        mVector outV(Vec1.len(),Vec1.vType);
+
+        for (int ix = 0; ix < Vec1.len(); ix++) {
+            outV[ix] = Vec1[ix]*Vec2[ix];
+        }
+        return outV.toMatrix();
+    } else {
+        mMatrix outM(Vec1.rowLen(), Vec2.colLen());
+        for(int r = 0; r < Vec1.rowLen(); r++){
+            for(int c = 0; c < Vec2.colLen(); c++){
+                double elem(0.0);
+                for(int i = 0; i < Vec1.colLen(); i++){
+                    elem += Vec1(r,i) * Vec2(i,c) ;
+
+                }
+                outM(r,c) = elem;
+            }
+        }
+        return outM;
     }
 
-    return newM;
+
+
+
 }
 
 

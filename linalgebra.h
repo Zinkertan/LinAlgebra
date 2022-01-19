@@ -55,6 +55,7 @@ protected:
 public:
     mMatrix(int rows, int columns);
     mMatrix(QVVdouble matr);
+    mMatrix(std::initializer_list<std::initializer_list<double>> matr);
     mMatrix(const mMatrix &mMatrix);
     ~mMatrix(){};
 
@@ -173,8 +174,8 @@ inline const double &mMatrix::operator()(int row, int col) const
 mMatrix operator+(const mMatrix &firstmMatrix, const mMatrix &secondmMatrix);
 
 enum mVecType{
-    mvtRow_, // horizontal vector
-    mvtColI  // vertical   vector
+    mvtRow_, // horizontal vector Вектор линия
+    mvtColI  // vertical   vector Вектор столбец
 };
 
 class mVector : public mMatrix
@@ -224,11 +225,17 @@ public:
         if (this == &V)
             return *this;
 
+
         assert(V.colLen() == 1 || V.rowLen() == 1);
         if (V.colLen() == 1 || V.rowLen() == 1) {
-            this->copymMatrix(V);
+            mMatrix::operator = (V);
+            this->vType = V.vType;
         }
         return *this;
+    }
+
+    mVector& operator*=(const double num){
+        return mVector::operator=(mVector::operator*(num));
     }
 
     mVector& operator=(const mMatrix &M){
@@ -238,7 +245,18 @@ public:
         return *this;
     }
 
+    mVector operator+(const mVector &);
+    mVector operator-(const mVector &);
+    mVector operator*(const double &);
+    mVector operator/(const double &);
+
+
+
     int len()const{return (vType == mvtRow_)?colLen():rowLen();}
+
+    mMatrix toMatrix(){
+        return mMatrix(data);
+    }
 
     QVdouble toQVd()const {
         switch (vType) {
@@ -254,6 +272,10 @@ public:
         }
     }
 
+    double at(int i) const {
+        return (vType == mvtRow_)?data[0][i]:data[i][0];
+    }
+
     double & operator[](int i) {
         return (vType == mvtRow_)?data[0][i]:data[i][0];
     }
@@ -267,6 +289,7 @@ public:
     friend mMatrix operator*(const mMatrix &Matr, const mVector &Vec);
     friend mMatrix operator*(const mVector &Vec , const mMatrix &Matr);
     friend mMatrix operator*(const mVector &Vec1, const mVector &Vec2);
+
 
 
 };
