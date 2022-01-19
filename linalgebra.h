@@ -39,8 +39,10 @@ enum mMatrType{
     mmtSquare
 };
 
-class mMatrix
-{
+class mMatrix {
+    // Матрица организована как вектор строк(row),
+    // т.е. сначала идет строка, потом обращение к колонке
+
 protected:
 //    double ** data;
 
@@ -54,21 +56,24 @@ public:
     mMatrix(int rows, int columns);
     mMatrix(QVVdouble matr);
     mMatrix(const mMatrix &mMatrix);
-    ~mMatrix();
+    ~mMatrix(){};
 
     int    rowLen() const;
     int    colLen() const;
     int    dim() const;
-    void   addRow() const;
-    void   addCol() const;
-    void   appendRow() const;
-    void   appendCol() const;
+    void   resize(int newRow, int newCol, bool isSafeResize = true);
+//    void   addRow() const;
+//    void   addCol() const;
+//    void   appendRow() const;
+//    void   appendCol() const;
+
+    void   copymMatrix(const mMatrix &matr);
+    void   resizeAndCopymMatrix(const mMatrix &matr);
 
     void   print();
-    void   copymMatrix(const mMatrix &Matr);
-    void   copyElementsInRow(const mMatrix &Matr, int i);
     QString toQStr(QString sep = "|",
                    QString format = "6 f") const;
+
     void   setItem(int row, int columns, double value);
     void   setRow (int rNum, QVdouble row);
     void   setCol (int cNum, QVdouble col);
@@ -76,7 +81,7 @@ public:
 
     QVdouble row(int indx);
     QVdouble col(int indx);
-//    vector<vector<double>>& matr(){return data;}
+
     const QVVdouble& matr() const{return data;} // для константных объектов
 
     void   fillZeros();
@@ -101,11 +106,13 @@ public:
     double& operator()(int row, int col);
     const double& operator()(int row, int col) const; // для константных объектов
 
-    mMatrix &operator=(const mMatrix &mMatrix);
+    mMatrix& operator=(const mMatrix &mMatrix) {
+        copymMatrix(mMatrix);
+        return *this;
+    }
 
     mMatrix operator+(const mMatrix &);
     mMatrix operator-(const mMatrix &);
-//    mMatrix operator*(const mMatrix &);
     mMatrix operator*(const double &);
     mMatrix operator/(const double &);
 
@@ -149,15 +156,15 @@ public:
 
 inline double &mMatrix::operator()(int row, int col)
 {
-    assert(col >= 0 && col < _columns);
     assert(row >= 0 && row < _rows);
+    assert(col >= 0 && col < _columns);
 
     return data[row][col];
 }
 inline const double &mMatrix::operator()(int row, int col) const
 {
-    assert(col >= 0 && col < _columns);
     assert(row >= 0 && row < _rows);
+    assert(col >= 0 && col < _columns);
 
     return data[row][col];
 }
@@ -166,29 +173,30 @@ inline const double &mMatrix::operator()(int row, int col) const
 mMatrix operator+(const mMatrix &firstmMatrix, const mMatrix &secondmMatrix);
 
 enum mVecType{
-    mvtRow,
-    mvtCol
+    mvtRow_, // horizontal vector
+    mvtColI  // vertical   vector
 };
 
 class mVector : public mMatrix
 {
 public:
+    mVecType vType;
 
-    mVector(int size, mVecType type = mvtRow) :
-        mMatrix(((type == mvtCol)?size:1),
-                ((type == mvtRow)?size:1)),
+    mVector(int size, mVecType type = mvtColI) :
+        mMatrix(((type == mvtColI)?size:1),
+                ((type == mvtRow_)?size:1)),
         vType(type){}
 
-    mVector(QVdouble vec, mVecType type = mvtRow) :
-        mMatrix(((type == mvtCol)?vec.size():1),
-                ((type == mvtRow)?vec.size():1)
+    mVector(QVdouble vec, mVecType type = mvtColI) :
+        mMatrix(((type == mvtColI)?vec.size():1),
+                ((type == mvtRow_)?vec.size():1)
                 ),
         vType(type){
         switch (type) {
-        case mvtRow:{
+        case mvtRow_:{
             data[0] = vec;
         }break;
-        case mvtCol:{
+        case mvtColI:{
             for (int cIndx = 0; cIndx < vec.size(); ++cIndx) {
                 data[cIndx][0] = vec[cIndx];
             }
@@ -197,17 +205,47 @@ public:
         }
     }
 
-    mVector(std::initializer_list<double> args):
-        mVector(args,mvtRow){}
+    mVector(mMatrix M) : mMatrix(0,0){
+        assert(M.colLen() == 1 || M.rowLen() == 1);
+        if (M.colLen() == 1) {
+            vType = mvtRow_;
+            this->resizeAndCopymMatrix(M);
+        } else if (M.rowLen() == 1){
+            vType = mvtRow_;
+            this->resizeAndCopymMatrix(M);
+        }
+    }
 
-    int len()const{return (vType == mvtRow)?colLen():rowLen();}
+    mVector(std::initializer_list<double> args):
+        mVector(args,mvtColI){}
+
+    mVector& operator=(const mVector &V){
+        // Проверка на самоприсваивание
+        if (this == &V)
+            return *this;
+
+        assert(V.colLen() == 1 || V.rowLen() == 1);
+        if (V.colLen() == 1 || V.rowLen() == 1) {
+            this->copymMatrix(V);
+        }
+        return *this;
+    }
+
+    mVector& operator=(const mMatrix &M){
+        if (M.colLen() == 1 || M.rowLen() == 1) {
+            this->copymMatrix(M);
+        }
+        return *this;
+    }
+
+    int len()const{return (vType == mvtRow_)?colLen():rowLen();}
 
     QVdouble toQVd()const {
         switch (vType) {
-        case mvtRow:{
+        case mvtRow_:{
             return data.at(0);
         }break;
-        case mvtCol:{
+        case mvtColI:{
             QVdouble out(len());
             for (int cIndx = 0; cIndx < len(); ++cIndx) {
                 out[cIndx] = data.at(cIndx).at(0);
@@ -217,10 +255,10 @@ public:
     }
 
     double & operator[](int i) {
-        return (vType == mvtRow)?data[0][i]:data[i][0];
+        return (vType == mvtRow_)?data[0][i]:data[i][0];
     }
     double operator[](int i) const {
-        return (vType == mvtRow)?data[0][i]:data[i][0];
+        return (vType == mvtRow_)?data[0][i]:data[i][0];
     }
 
 
@@ -230,12 +268,13 @@ public:
     friend mMatrix operator*(const mVector &Vec , const mMatrix &Matr);
     friend mMatrix operator*(const mVector &Vec1, const mVector &Vec2);
 
-    mVecType vType;
+
 };
 
 inline mMatrix mMatrix::solve(mMatrix A, mMatrix B)
 {
     return A.inv() * B;
 }
+
 
 #endif // LINALGEBRA_H

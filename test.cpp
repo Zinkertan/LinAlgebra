@@ -85,7 +85,7 @@ QString test::test_mAlg()
             (A6_.inv()).toQStr()+ "\n\n";
 
 
-    mVector V6_({5,-1,4},mvtCol);
+    mVector V6_({5,-1,4},mvtColI);
     auto X = mMatrix::solve(A6_,V6_);
 //    mMatrix A2({{4,8},{6,2}});
     out +=  QString("AX=B\n A=\n%1\nB=\n%2\nX=\n%3\n\n").
@@ -103,21 +103,31 @@ QString test::test_anGeom()
     QString out = "";
     lP2D A (2.0,1.0);
     lP2D B (-2.0,3.0);
-    out += QString("A(%1,%2)\n")
-            .arg(A.x)
-            .arg(A.y);
-    out += QString("B(%1,%2)\n")
-            .arg(B.x)
-            .arg(B.y);
+    out += QString("A%1\nB%2\n")
+            .arg(A.toQStr())
+            .arg(B.toQStr());
 
-    lV2D a (A,B);
+    lV2D f (A,B);
 
-    out += QString("AB(a)(%1,%2), len = %3\n")
-            .arg(a.x)
-            .arg(a.y)
-            .arg(a.len());
+    out += QString("AB(f)%1\n\n")
+            .arg(f.toQStr(true));
+
+    lV3D a (-1,2,-3);
+    lV3D b (0,-4,1);
+    lV3D c = a*b;
+
+    out += QString("f vec\n%1\n")
+            .arg(f.vec().toQStr());
+
+
+    out += QString("\nVector multiply c = [a,b]\na%1\nb%2\nc%3\n")
+            .arg(a.toQStr())
+            .arg(b.toQStr())
+            .arg(c.toQStr());
+
+    out += QString("c vec\n%1\n")
+            .arg(c.vec().toQStr());
+
 
     return out;
-
-
 }

@@ -37,8 +37,7 @@ mMatrix::mMatrix(const mMatrix &matr):
         _dim(matr._dim)
 {}
 
-mMatrix::~mMatrix()
-{}
+
 int mMatrix::rowLen() const
 {
     return _rows;
@@ -54,9 +53,42 @@ int mMatrix::dim() const
     return _dim;
 }
 
-void mMatrix::copyElementsInRow(const mMatrix &m, int i){
-    for (int j = 0; j < _columns; ++j)
-        data[i][j] = m.data[i][j];
+void mMatrix::resize(int newRow, int newCol, bool isSafeResize)
+{
+    if (isSafeResize) {
+        if (_columns > newCol) {
+            for (int row = 0; row < _rows; ++row) {
+                for (int i = 0; i < _columns-newCol; ++i) {
+                    data[row].removeLast();
+                }
+            }
+            _columns = newCol;
+        }
+        if (_columns < newCol) {
+
+            for (int row = 0; row < _rows; ++row) {
+                for (int i = 0; i < _columns-newCol; ++i) {
+                    data[row].append(0.0);
+                }
+            }
+            _columns = newCol;
+        }
+        if (_rows > newRow) {
+            for (int i = 0; i < _rows-newRow; ++i) {
+                data.removeLast();
+            }
+            _rows = newRow;
+        }
+        if (_rows < newRow) {
+            for (int i = 0; i < newRow-_rows; ++i) {
+                data.append(QVdouble(_columns));
+            }
+            _rows = newRow;
+        }
+    } else {
+        data = QVVdouble(newRow,QVdouble(newCol));
+    }
+
 }
 
 void mMatrix::copymMatrix(const mMatrix &matr)
@@ -66,8 +98,18 @@ void mMatrix::copymMatrix(const mMatrix &matr)
         throw std::logic_error("Wrong sizes");
     }
 
-    for (int i = 0; i < _rows; ++i)
-        copyElementsInRow(matr, i);
+    this->data = matr.data;
+}
+
+void mMatrix::resizeAndCopymMatrix(const mMatrix &matr)
+{
+    this->_columns = matr._columns;
+    this->_rows    = matr._rows;
+    this->data     = matr.data;
+    if (_rows == _columns) {
+        _dim = _rows;
+        _type = mmtSquare;
+    }
 }
 
 void mMatrix::print()
@@ -156,6 +198,21 @@ void mMatrix::setCol(int cNum, QVdouble col)
 double mMatrix::it(int row, int columns) const
 {
     return data[row][columns];
+}
+
+QVdouble mMatrix::row(int indx)
+{
+    return data[indx];
+}
+
+QVdouble mMatrix::col(int indx)
+{
+    QVdouble outCol(colLen());
+    for (int row = 0; row < _rows; ++row) {
+        outCol[row] = data.at(row).at(indx);
+    }
+    return outCol;
+
 }
 
 void mMatrix::fillZeros()
@@ -297,11 +354,7 @@ bool mMatrix::isSqr()
 }
 
 
-mMatrix &mMatrix::operator=(const mMatrix &mMatrix)
-{
-    copymMatrix(mMatrix);
-    return * this;
-}
+
 
 mMatrix mMatrix::operator+(const mMatrix & second)
 {
