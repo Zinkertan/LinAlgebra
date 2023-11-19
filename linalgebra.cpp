@@ -182,7 +182,7 @@ QString mMatrix::toQStr(QString sep,
                            dataInStr.at(row).at(col).length());
                 if (raznica > 0){
                     if (dataInStr.at(row).at(col).length()>0) {
-                        lev_otst = (dataInStr.at(row).at(col).at(0) != "-")?1:0;
+                        lev_otst = (dataInStr.at(row).at(col).startsWith("-"))?0:1;
                         prav_otst = raznica - lev_otst;
                     } else {
                         lev_otst = 0;
@@ -516,14 +516,14 @@ std::istream & operator>>(std::istream & istream, mMatrix & number)
 
 mVector mVector::operator+(const mVector & second)
 {
-    if (this->vType == second.vType) {
+    if (this->_vType == second._vType) {
         if (this->len()!= second.len())
         {
             assert(this->len()==second.len());
             throw std::logic_error("Wrong sizes");
         }
     }
-    mVector newV(this->len(),this->vType);
+    mVector newV(this->len(),this->_vType);
 
     for(int i = 0; i < this->len(); i++){
         newV[i] = this->at(i) + second[i];
@@ -534,7 +534,7 @@ mVector mVector::operator+(const mVector & second)
 
 mVector mVector::operator*(const double & num)
 {
-    mVector newV(this->len(),this->vType);
+    mVector newV(this->len(),this->_vType);
 
     for(int i = 0; i < this->len(); i++){
         newV[i] = this->at(i) * num;
@@ -554,10 +554,25 @@ mVector mVector::operator/(const double &num)
     return mVector::operator*(1.0/num);
 }
 
+double mVector::dot(const mVector vec) const{
+    double out = 0.0;
+    if (this->_vType == vec._vType) {
+        if (this->len()!= vec.len())
+        {
+            assert(this->len()==vec.len());
+            throw std::logic_error("Wrong sizes");
+        }
+    }
+    for (int ix = 0; ix < len(); ix++) {
+        out += this->at(ix)*vec[ix];
+    }
+    return out;
+}
+
 mVector operator*(const double num, const mVector &Vec)
 {
 
-    mVector outV(Vec.len(),Vec.vType);
+    mVector outV(Vec.len(),Vec._vType);
 
     for(int r = 0; r < Vec.rowLen(); r++){
         for(int c = 0; c < Vec.colLen(); c++){
@@ -571,7 +586,7 @@ mVector operator*(const double num, const mVector &Vec)
 mVector operator*(const mVector &Vec, const double num)
 {
 
-    mVector outV(Vec.len(),Vec.vType);
+    mVector outV(Vec.len(),Vec._vType);
 
     for(int r = 0; r < Vec.rowLen(); r++){
         for(int c = 0; c < Vec.colLen(); c++){
@@ -633,13 +648,13 @@ mMatrix operator*(const mVector &Vec , const mMatrix &Matr)
 mMatrix operator*(const mVector &Vec1 , const mVector &Vec2)
 {
 
-    if (Vec1.vType == Vec2.vType) {
+    if (Vec1._vType == Vec2._vType) {
         if (Vec2.len()!= Vec1.len())
         {
             assert(Vec1.len()==Vec2.len());
             throw std::logic_error("Wrong sizes");
         }
-        mVector outV(Vec1.len(),Vec1.vType);
+        mVector outV(Vec1.len(),Vec1._vType);
 
         for (int ix = 0; ix < Vec1.len(); ix++) {
             outV[ix] = Vec1[ix]*Vec2[ix];

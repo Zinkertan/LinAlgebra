@@ -92,8 +92,8 @@ public:
     double operator[](int i) const { return *mData[i]; }
 
 
-    QString toQStr() const{
-        QString tmp = "(%1,%2)";
+    QString toQStr(QString tmp = "(%1,%2)") const{
+
         return tmp.arg(x).arg(y);
     }
 private:
@@ -156,8 +156,7 @@ public:
     double operator[](int i) const { return *mData[i]; }
 
 
-    QString toQStr() const{
-        QString tmp = "(%1,%2,%3)";
+    QString toQStr(QString tmp = "(%1,%2,%3)") const{
         return tmp.arg(x).arg(y).arg(z);
     }
 private:

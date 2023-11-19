@@ -181,18 +181,18 @@ enum mVecType{
 class mVector : public mMatrix
 {
 public:
-    mVecType vType;
+    mVecType _vType;
 
     mVector(int size, mVecType type = mvtColI) :
         mMatrix(((type == mvtColI)?size:1),
                 ((type == mvtRow_)?size:1)),
-        vType(type){}
+        _vType(type){}
 
     mVector(QVdouble vec, mVecType type = mvtColI) :
         mMatrix(((type == mvtColI)?vec.size():1),
                 ((type == mvtRow_)?vec.size():1)
                 ),
-        vType(type){
+        _vType(type){
         switch (type) {
         case mvtRow_:{
             data[0] = vec;
@@ -206,19 +206,23 @@ public:
         }
     }
 
+    mVector(std::initializer_list<double> args):
+        mVector(args,mvtColI){}
+
+
     mVector(mMatrix M) : mMatrix(0,0){
-        assert(M.colLen() == 1 || M.rowLen() == 1);
+        assert((M.colLen() == 1 && M.rowLen() >= 1)||
+               (M.rowLen() == 1 && M.colLen() >= 1));
         if (M.colLen() == 1) {
-            vType = mvtRow_;
+            _vType = mvtColI;
             this->resizeAndCopymMatrix(M);
         } else if (M.rowLen() == 1){
-            vType = mvtRow_;
+            _vType = mvtRow_;
             this->resizeAndCopymMatrix(M);
         }
     }
 
-    mVector(std::initializer_list<double> args):
-        mVector(args,mvtColI){}
+    mVector(const mVector& V) : mVector(V.toQVd(),V._vType){}
 
     mVector& operator=(const mVector &V){
         // Проверка на самоприсваивание
@@ -229,13 +233,25 @@ public:
         assert(V.colLen() == 1 || V.rowLen() == 1);
         if (V.colLen() == 1 || V.rowLen() == 1) {
             mMatrix::operator = (V);
-            this->vType = V.vType;
+            this->_vType = V._vType;
         }
         return *this;
     }
 
+    mVector& operator+=(const mVector vec){
+        return mVector::operator=(mVector::operator+(vec));
+    }
+
+    mVector& operator-=(const mVector vec){
+        return mVector::operator=(mVector::operator-(vec));
+    }
+
     mVector& operator*=(const double num){
         return mVector::operator=(mVector::operator*(num));
+    }
+
+    mVector& operator/=(const double num){
+        return mVector::operator=(mVector::operator/(num));
     }
 
     mVector& operator=(const mMatrix &M){
@@ -250,16 +266,24 @@ public:
     mVector operator*(const double &);
     mVector operator/(const double &);
 
+    double dot(const mVector vec)const;
 
+    int len()const{return (_vType == mvtRow_)?colLen():rowLen();}
 
-    int len()const{return (vType == mvtRow_)?colLen():rowLen();}
+    mVector T(){
+        mVector transposedV(len(), (_vType==mvtRow_)?mvtColI:mvtRow_);
+        for (int i = 0; i < len(); ++i) {
+            transposedV[i]=this->at(i);
+        }
+        return transposedV;
+    }
 
-    mMatrix toMatrix(){
+    mMatrix toMatrix()const{
         return mMatrix(data);
     }
 
     QVdouble toQVd()const {
-        switch (vType) {
+        switch (_vType) {
         case mvtRow_:{
             return data.at(0);
         }break;
@@ -270,17 +294,18 @@ public:
             } return out;
         }break;
         }
+        return {};
     }
 
     double at(int i) const {
-        return (vType == mvtRow_)?data[0][i]:data[i][0];
+        return (_vType == mvtRow_)?data.at(0).at(i):data.at(i).at(0);
     }
 
     double & operator[](int i) {
-        return (vType == mvtRow_)?data[0][i]:data[i][0];
+        return (_vType == mvtRow_)?data[0][i]:data[i][0];
     }
     double operator[](int i) const {
-        return (vType == mvtRow_)?data[0][i]:data[i][0];
+        return (_vType == mvtRow_)?data[0][i]:data[i][0];
     }
 
 
@@ -290,7 +315,16 @@ public:
     friend mMatrix operator*(const mVector &Vec , const mMatrix &Matr);
     friend mMatrix operator*(const mVector &Vec1, const mVector &Vec2);
 
-
+    mVector& fill(double num){
+        for (int i = 0; i < len(); ++i) {
+            if (_vType == mvtRow_){
+                data[0][i] = num;
+            } else {
+                data[i][0] = num;
+            }
+        }
+        return *this;
+    }
 
 };
 
@@ -298,6 +332,8 @@ inline mMatrix mMatrix::solve(mMatrix A, mMatrix B)
 {
     return A.inv() * B;
 }
+
+typedef std::function<double(mVector)> f_x;
 
 
 #endif // LINALGEBRA_H
